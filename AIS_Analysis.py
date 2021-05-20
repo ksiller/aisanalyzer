@@ -165,6 +165,8 @@ def create_skeleton(image, name, min_branch_length=10, nuclei_rois=None, sample_
 		    closest_nucleus = nroi2
 		else:
 		    closest_nucleus = nroi1
+		closest_nucleus.setName('%s-nucleus-ROI' % (name))
+
 
 	poly = Polygon()
 	for p in points:
@@ -179,6 +181,7 @@ def create_skeleton(image, name, min_branch_length=10, nuclei_rois=None, sample_
 	ais_roi = PolygonRoi(poly, PolygonRoi.POLYLINE)
 	ais_roi.setFillColor(Color(0.0,1.0,1.0,0.5));
 	ais_roi.setStrokeColor(Color(0.0,1.0,1.0,0.5));
+	ais_roi.setName('%s-AIS-ROI' % (name))
 	#ais_roi.setStrokeWidth(sample_width)
 	IJ.run(ais_skeleton, "Analyze Particles...", "size=20-Infinity pixel exclude clear add");
 	IJ.run(ais_skeleton, "Clear", "slice")
@@ -217,8 +220,8 @@ def create_skeleton(image, name, min_branch_length=10, nuclei_rois=None, sample_
 
 
 def rolling_seq(seq, window):
-    "Returns a sliding window (of width n) over data from the iterable seq"
-    "   s -> (s0,s1,...s[n-1]), (s1,s2,...,sn), ...                   "
+    """Returns a sliding window (of width n) over data from the iterable seq
+    s -> (s0,s1,...s[n-1]), (s1,s2,...,sn), ..."""
     it = iter(seq)
     result = tuple(islice(it, window))
     if len(result) == window:
@@ -316,29 +319,33 @@ def create_plot(imp, method, average, threshold=0.1):
 	    trim_y = [average_y[i] for i in range(firstidx, lastidx+1)]
 
 	# raw data
-	plot = Plot("%s-Plot" % imp.getTitle(), x_label, y_label)
+	flags = Plot.getDefaultFlags()
+	flags = flags - Plot.Y_GRID - Plot.X_GRID
+	plot = Plot("%s-Plot" % imp.getTitle(), x_label, y_label, flags)
 	plot.setLineWidth(1)
 	plot.setColor(Color.BLACK)
 	plot.addPoints(x_values, intensity,Plot.LINE)
 
 	# threshold line
 	plot.setLineWidth(2)
-	plot.setColor(Color.BLUE)
+	plot.setColor(Color.BLACK)
 	plot.addPoints([0,x_inc * imp.getWidth()], [threshold_intensity,threshold_intensity],Plot.LINE)
 
 	# rolling average
 	plot.setLineWidth(2)
-	plot.setColor(Color.RED)
+	plot.setColor(Color.MAGENTA)
 	plot.addPoints(average_x,average_y,Plot.LINE)
+
+	# standard legend labels
+	labels = "\t".join(['Raw Data (%s)' % method, 'Intensity threshold (%d%s)' % (100*threshold, '%'), 'Rolling Average (n=%d)' % average])
 
 	# trimmed rolling average
 	if perform_trim:
 	    plot.setLineWidth(2)
 	    plot.setColor(Color.GREEN)
 	    plot.addPoints(trim_x,trim_y,Plot.LINE)
+	    labels+='\tTrimmed Rolling Average (n=%d)' % average
 
-	# legend
-	labels = "\t".join(['Raw Data (%s)' % method, 'Intensity threshold (%d%s)' % (100*threshold, '%'), 'Rolling Average (n=%d)' % average,'Trimmed Rolling Average (n=%d)' % average])
 	plot.setColor(Color.BLACK)
 	plot.setLimitsToFit(False)
 	plot.addLegend(labels)
@@ -423,6 +430,7 @@ def process_image(imps, rois, ais_chno, nucleus_chno, bg_roino=3, sample_width=3
 		ip = Straightener().straightenLine(ais_imp, sample_width)
 		straight_imp = ImagePlus('%s-%s-AIS-Straight' % (orig_title, rois[i].getName()), ip)
 		straight_imp.setCalibration(imps[ais_chno-1].getCalibration().copy())
+		IJ.run(straight_imp, "Green Fire Blue", "")
 
 		roiresult = {
 			'roi-name': rois[i].getName(),
@@ -442,17 +450,23 @@ def process_image(imps, rois, ais_chno, nucleus_chno, bg_roino=3, sample_width=3
 	return results, background
 
 
-def save_as_tif(directory, image):
+def save_as_tif(directory, title, image):
 	"""Saves an ImagePlus object in a specific directory."""
-	title = image.getTitle()
-	outputfile = path.join(outputdir, title)
+	outputfile = path.join(directory, title)
 	IJ.saveAs(image, "TIFF", outputfile)
 	print "Saved", outputfile 
 
 
-def save_roi(directory, roi):
+def save_roi(directory, name, roi):
     """Saves ROI object in specific directory"""
-    rm = RoiManager()
+    if roi is not None:
+        rm = RoiManager(False)
+        print roi.getName()
+        roifile = path.join(directory, name+".zip")
+        rm.addRoi(roi)
+        rm.runCommand("Save", roifile)
+    else:
+        print "skipping saving ROI"
     
 	 
 # Main code
@@ -479,19 +493,22 @@ else:
 				#	i.show()
 			results, background = process_image(imps, rois, ais_chno, nucleus_chno, bg_roino=3, average=average, sample_width=ais_linewidth, method=ais_method, threshold=ais_threshold)
 			for roiresult in results:
-				overlay.add(roiresult['ais-roi'])
-				overlay.add(roiresult['nucleus-roi'])
+				ais_roi = roiresult['ais-roi']
+				nucleus_roi = roiresult['nucleus-roi']
+				ais_image = roiresult['ais-image']
+				overlay.add(ais_roi)
+				overlay.add(nucleus_roi)
 				rt = roiresult['table']
 				rt_title = '%s-%s-Results' % (composite.getTitle(), roiresult['roi-name'])
 				rt.saveAs(os.path.join(outputdir, '%s.csv' % rt_title))
 				if show_plot:
 					rt.show(rt_title)
 					roiresult['plot'].show()
-				ais_image = roiresult['ais-image']
-				save_as_tif(outputdir, ais_image)
-				save_roi(outputdir, roiresult['ais-roi'])
-				save_roi(outputdir, roiresult['nucleus-roi'])
+				save_as_tif(outputdir, '%s-%s-AIS-straight' % (composite.getTitle(), roiresult['roi-name']), ais_image)
+				save_roi(outputdir, '%s-%s-AIS-ROI' % (composite.getTitle(), roiresult['roi-name']), ais_roi)
+				save_roi(outputdir, '%s-%s-nucleus-ROI' % (composite.getTitle(), roiresult['roi-name']), nucleus_roi)
 				if show_img:
 					ais_image.show()
 		composite.setOverlay(overlay)
+		break;
 	print 'Done.\n'
