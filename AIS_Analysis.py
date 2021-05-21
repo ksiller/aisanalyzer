@@ -510,5 +510,4 @@ else:
 				if show_img:
 					ais_image.show()
 		composite.setOverlay(overlay)
-		break;
 	print 'Done.\n'
