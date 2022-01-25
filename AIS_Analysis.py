@@ -8,6 +8,7 @@
 # @ Integer (label="Rolling average", min=1, max=250, value=10) average
 # @ Boolean (label="Show image", value=True) show_img
 # @ Boolean (label="Show intensity profile", value=True) show_plot
+# @ Boolean (label="Clear Summary", value=False) clear_summary
 
 import sys
 import math
@@ -29,6 +30,15 @@ from itertools import islice
 
 import os
 from os import path
+
+AIS_SUMMARY_TABLE = 'AIS Summary'
+
+DIST_RAW_COL = 'Distance (raw)'
+INT_RAW_COL = 'Intensity (raw)'
+DIST_AVG_COL = 'Distance (avg)'
+INT_AVG_COL = 'Intensity (avg)'
+DIST_TRIM_COL = 'Distance (trimmed)'
+INT_TRIM_COL = 'Intensity (trimmed)'
 
 def get_file_pairs(inputdir, img_ext="nd2", roi_ext="zip"):
     pairs = []
@@ -352,15 +362,15 @@ def create_plot(imp, method, average, threshold=0.1):
 
 	rt = ResultsTable()
 	for row,x in enumerate(x_values):
-		rt.setValue('Distance (raw)', row, x)
-		rt.setValue('Intensity (raw)', row, intensity[row])
+		rt.setValue(DIST_RAW_COL, row, x)
+		rt.setValue(INT_RAW_COL, row, intensity[row])
 	for row,x in enumerate(average_x):
-		rt.setValue('Distance (averaged)', row, x)
-		rt.setValue('Intensity (averaged)', row, average_y[row])
+		rt.setValue(DIST_AVG_COL, row, x)
+		rt.setValue(INT_AVG_COL, row, average_y[row])
 	if perform_trim:
 	    for row,x in enumerate(trim_x):
-		    rt.setValue('Distance (trimmed)', row, x)
-		    rt.setValue('Intensity (trimmed)', row, trim_y[row])
+		    rt.setValue(DIST_TRIM_COL, row, x)
+		    rt.setValue(INT_TRIM_COL, row, trim_y[row])
     
 	return plot, rt
 
@@ -467,8 +477,22 @@ def save_roi(directory, name, roi):
         rm.runCommand("Save", roifile)
     else:
         print "skipping saving ROI"
-    
-	 
+
+def add_to_summary(summary_rt, imgname, roiname, rt):
+    ais_start = 'na'
+    ais_length = 'na'
+    if DIST_AVG_COL in rt.getColumnHeadings():
+        col_idx = 4 #rt.getColumnIndex​(DIST_AVG_COL)
+        avg_dist = rt.getColumn(col_idx)
+        if len(avg_dist) > 0:
+            ais_start = avg_dist[0]
+            ais_length = max(avg_dist)-ais_start  
+    row = summary_rt.getCounter()
+    summary_rt.setValue('Image', row, imgname)
+    summary_rt.setValue('ROI', row, roiname)
+    summary_rt.setValue('AIS start', row, ais_start)
+    summary_rt.setValue('AIS length', row, ais_length)
+
 # Main code
 inputdir = str(inputdir)
 outputdir = str(outputdir)
@@ -477,6 +501,11 @@ ais_threshold /=100
 if not path.isdir(inputdir):
     print inputdir, 'does not exist or is not a directory.'
 else:
+	summary_rt = ResultsTable.getResultsTable(AIS_SUMMARY_TABLE)
+	if summary_rt is None:
+	    summary_rt = ResultsTable()
+	elif clear_summary:
+		summary_rt.reset()
 	if not path.isdir(outputdir):
 		os.makedirs(outputdir)
 	file_pairs = get_file_pairs(inputdir)
@@ -501,6 +530,7 @@ else:
 				rt = roiresult['table']
 				rt_title = '%s-%s-Results' % (composite.getTitle(), roiresult['roi-name'])
 				rt.saveAs(os.path.join(outputdir, '%s.csv' % rt_title))
+				add_to_summary(summary_rt, composite.getTitle(), roiresult['roi-name'], rt)
 				if show_plot:
 					rt.show(rt_title)
 					roiresult['plot'].show()
@@ -510,4 +540,6 @@ else:
 				if show_img:
 					ais_image.show()
 		composite.setOverlay(overlay)
+		break
+	summary_rt.show(AIS_SUMMARY_TABLE)
 	print 'Done.\n'
