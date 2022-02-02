@@ -540,6 +540,5 @@ else:
 				if show_img:
 					ais_image.show()
 		composite.setOverlay(overlay)
-		break
 	summary_rt.show(AIS_SUMMARY_TABLE)
 	print 'Done.\n'
