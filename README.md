@@ -4,6 +4,10 @@
 
 The AIS Analyzer is an image analysis plugin for Fiji/ImageJ to aid in the quantification of axon initial segment (AIS) morphometric parameters. These include (1) AIS length, (2) AIS distance from cell soma, and (3) fluorescence intensity profiles of AIS markers. The purpose of the analysis and output is to improve the rigor, reproducibility, and reliability of AIS measurements compared to those done manually.
 
+![workflow](./screenshots/workflow.png)
+
+![panels](./screenshots/workflow_panels.png)
+
 ## Prerequisites
 
 In order to use the plugin, download and install the Fij application (available here https://imagej.net/software/fiji/).
@@ -67,6 +71,8 @@ The plugin processes pairs of fluorescent images and corresponding Fiji/ImageJ r
 
 In Fiji, go to *Plugins* > *AIS_Analysis*. This will start the plugin and display a dialog to configure analysis parameters
 
+![dialog](./screenshots/config.png)
+
 * **Input directory:** folder with 1) multi-channel images (with at least two channels and FIJI-supported) and 2) region of interest (ROIs; must match the name of the respective multi-channel image as a zip file) to process. 
 
 * **Output directory:** empty folder to store 1) nucleus ROIs, 2)AIS ROIs, and 3) results
@@ -94,6 +100,12 @@ Clik **OK** to run the plugin on all images in the chosen input directory
 ## Output
 
 It’s recommended that you verify the accuracy of the automated nuclei and AIS outlines by overlaying them with the original input image. We also recommend you verify the accuracy of the distance from the nucleus. If the distance from the nuclei is incorrect, you can manually measure by using the straight line tool. Or crop your images to ensure that you only have one nucleus per image.  
+
+![segmentation](./screenshots/segmentation.png)
+
+![lineprofile](./screenshots/lineprofile.png)
+
+![profile](./screenshots/profile.png)
 
 The csv files can be processed in your software of choice for further analysis.
 
