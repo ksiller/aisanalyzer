@@ -62,20 +62,20 @@ The plugin processes pairs of fluorescent images and corresponding Fiji/ImageJ r
         
     c. Save set of ROIs in *ROI Manager* as a zip file with the same name as the image, but use .zip extension instead.
     
-    d. Repeat steps for all of the images in the folder
+    d. Repeat steps for all of the images in the folder.
 
     
     e. Save the sets of ROIs as zip file. The ROI filename must match the name of the respective multi-channel image it belongs to. 
     
 ## Running the Plugin
 
-In Fiji, go to *Plugins* > *AIS_Analysis*. This will start the plugin and display a dialog to configure analysis parameters
+In Fiji, go to *Plugins* > *AIS_Analysis*. This will start the plugin and display a dialog to configure analysis parameters.
 
 ![dialog](./screenshots/config.png)
 
 * **Input directory:** folder with 1) multi-channel images (with at least two channels and FIJI-supported) and 2) region of interest (ROIs; must match the name of the respective multi-channel image as a zip file) to process. 
 
-* **Output directory:** empty folder to store 1) nucleus ROIs, 2)AIS ROIs, and 3) results
+* **Output directory:** empty folder to store 1) nucleus ROIs, 2)AIS ROIs, and 3) results.
 
 * **Nucleus channel:** number indicating which channel the nuclei stain is located.
 
@@ -89,13 +89,13 @@ In Fiji, go to *Plugins* > *AIS_Analysis*. This will start the plugin and displa
 
 * **Rolling average:** sets the number of local neighborhood pixels to average over for plotting the AIS line intensity profile.
 
-* **Show image:** select if you would like to see the images in real-time as the plugin analyzes the data
+* **Show image:** select if you would like to see the images in real-time as the plugin analyzes the data.
 
-* **Show intensity profile:** select if you would like to see the AIS intensity plot profile in real-time as the plugin analyzes the data 
+* **Show intensity profile:** select if you would like to see the AIS intensity plot profile in real-time as the plugin analyzes the data. 
 
-* **Clear summary:** select if you would like summary data from a previous folder to be erased before analyzing the next folder
+* **Clear summary:** select if you would like summary data from a previous folder to be erased before analyzing the next folder.
 
-Clik **OK** to run the plugin on all images in the chosen input directory
+Clik **OK** to run the plugin on all images in the chosen input directory.
 
 ## Output
 
