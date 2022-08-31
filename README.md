@@ -81,13 +81,13 @@ In Fiji, go to *Plugins* > *AIS_Analysis*. This will start the plugin and displa
 
 * **AIS channel:** number indicating which channel the AIS stain is located.
 
-* **AIS segmentation line width:** thickness of the line used to trace the AIS.
+* **AIS segmentation line width:** thickness of the line used to trace the AIS for the line intensity profile.
 
-* **AIS cross-section analysis:** 
+* **AIS cross-section analysis:** algorithm used (mean or median) to compute the intensity from the AIS line cross section.
 
-* **AIS rel. Intensity threshold (0-100% of max):** the percentage of signal used as a cut-off to determine AIS from background signal.
+* **AIS rel. intensity threshold (0-100% of max):** the percentage of signal used as a lower bound threshold to determine AIS from background signal.
 
-* **Rolling average:** 
+* **Rolling average:** sets the number of local neighborhood pixels to average over for plotting the AIS line intensity profile.
 
 * **Show image:** select if you would like to see the images in real-time as the plugin analyzes the data
 
