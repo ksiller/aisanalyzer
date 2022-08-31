@@ -510,6 +510,7 @@ else:
 		os.makedirs(outputdir)
 	file_pairs = get_file_pairs(inputdir)
 	for item in file_pairs:
+	  try:
 		overlay = Overlay()
 		composite,imps = open_image(item['img'])
 		rois = load_rois(item['roi'])
@@ -540,5 +541,7 @@ else:
 				if show_img:
 					ais_image.show()
 		composite.setOverlay(overlay)
+	  except:
+	    print 'Skipping', item
 	summary_rt.show(AIS_SUMMARY_TABLE)
 	print 'Done.\n'
