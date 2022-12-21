@@ -14,7 +14,7 @@ In order to use the plugin, download and install the Fij application (available 
 
 ## Plugin installation
 
-1. Download the source code by either cloning this repository: `git clone https://github.com/ksiller/aisanalyzer.git`, or alternatively download and unpack the zip archive of this repositry.
+1. Download the source code by either cloning this repository: `git clone https://github.com/ksiller/aisanalyzer.git`, or alternatively download and unpack the zip archive of this repository.
 
 2. Start Fiji.
 
